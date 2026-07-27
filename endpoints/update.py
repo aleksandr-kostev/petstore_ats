@@ -22,7 +22,6 @@ class PutRequest:
         assert self.response_json['category']['name'] == name, (
             f"Expected pet name {name}, but got {self.response_json['category']['name']}"
         )
-        print(self.response_json['category']['name'])
 
     # Проверка статус кода
     def check_response_status(self):

@@ -11,14 +11,15 @@ USER_EP = '/user'
 
 # Создание пейлоуда питомца
 @pytest.fixture
-def create_pet_payload():
+def create_pet_payload(request):
+    pet_name = getattr(request, "param", "Doggie")
     payload = {
       "id": 0,
       "category": {
         "id": 0,
         "name": "string"
       },
-
+      "name" : pet_name,
       "photoUrls": [
         "string"
       ],
@@ -30,16 +31,15 @@ def create_pet_payload():
       ],
       "status": "available"
     }
-    random_name = ''.join(random.choices(string.ascii_letters, k=8))
-    payload["category"]["name"] = random_name
     return payload
 
 # Создание пейлоуда пользователя
 @pytest.fixture
-def create_user_payload():
+def create_user_payload(request):
+    username = getattr(request, "param", "User")
     payload = {
             "id": 0,
-            "username": "string",
+            "username": username,
             "firstName": "string",
             "lastName": "string",
             "email": "string",
@@ -47,8 +47,6 @@ def create_user_payload():
             "phone": "string",
             "userStatus": 3
         }
-    random_name = ''.join(random.choices(string.ascii_letters, k=8))
-    payload["username"] = random_name
     return payload
 
 # Удаление питомца после теста

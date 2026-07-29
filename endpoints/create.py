@@ -20,13 +20,13 @@ class PostRequest:
 
     # Проверка имени созданного питомца
     def check_name(self, name):
-        assert self.response_json['category']['name'] == name, (
-            f"Expected pet name {name}, but got {self.response_json['category']['name']}"
+        assert self.response_json['name'] == name, (
+            f"Expected pet name {name}, but got {self.response_json['name']}"
         )
 
     # Проверка статус кода
-    def check_response_status(self):
-        assert self.response.status_code == 200, (f"Expected status code 200")
+    def check_response_status(self, expected_code: int):
+        assert self.response.status_code == expected_code, (f"Expected status code {expected_code}, but got {self.response.status_code}")
 
     # Проверка headers
     def check_headers(self):

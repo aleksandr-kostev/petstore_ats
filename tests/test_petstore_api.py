@@ -1,5 +1,6 @@
 import string
 import random
+import pytest
 from endpoints.create import PostRequest
 from endpoints.delete import DeleteRequest
 from endpoints.read import GetRequest
@@ -10,22 +11,58 @@ BASE_URL = 'https://petstore.swagger.io/v2'
 PET_EP = '/pet'
 USER_EP = '/user'
 
+@pytest.mark.parametrize(
+    "create_pet_payload, expected_code",
+    [
+        # Позитивные кейсы
+        ("Doggie", 200),
+        ("Ca", 200),
+        ("Современные технологии развиваются очень быстро, открывая перед каждым"
+         " человеком уникальные возможности для обучения, творчества, работы и "
+         "эффективного общения в любое время суток из любой точки нашей большой планеты", 200),
+        ("12345", 200),
+        (" ", 200),
+        ("Cat and Dog", 200),
+        (" Cattie", 200),
+        # Негативные кейсы
+        (12345, 400),
+        ("", 400),
+        (None, 400)
+    ],
+    indirect=["create_pet_payload"],
+    ids=[
+        "Standard name",
+        "Short name",
+        "Long name (250 chars)",
+        "Numeric string name",
+        "Space",
+        "Name with space",
+        "Space at the beginning ",
+        "Name is integer",
+        "Empty string",
+        "None"
+    ]
+)
+
 
 # Add a new pet to the store (POST)
-def test_add_pet(create_pet_payload, delete_test_pet):
+def test_add_pet(create_pet_payload, expected_code, delete_test_pet):
     # Создание пейлоуда
     payload = create_pet_payload
-    name = payload['category']['name']
+    name = payload['name']
     # Отправка POST запроса
     add_new_pet = PostRequest(BASE_URL, PET_EP)
     add_new_pet.send_request(payload)
     # Передача id питомца в фикстуру удаления
-    created_pet_id = add_new_pet.get_id()
-    delete_test_pet["id"] = created_pet_id
+    if add_new_pet.response.status_code == 200:
+        created_pet_id = add_new_pet.get_id()
+        delete_test_pet["id"] = created_pet_id
     # Проверки
-    add_new_pet.check_response_status()
+    add_new_pet.check_response_status(expected_code)
     add_new_pet.check_headers()
-    add_new_pet.check_name(name)
+    if add_new_pet.response.status_code == 200:
+        add_new_pet.check_name(name)
+
 
 # Find pet by id (GET)
 def test_get_pet(create_pet_payload, delete_test_pet):
@@ -72,7 +109,7 @@ def test_update_pet(create_pet_payload, delete_test_pet):
     # Изменение пейлоуда для теста
     payload['id'] = created_pet_id
     new_name = ''.join(random.choices(string.ascii_letters, k=8))
-    payload['category']['name'] = new_name
+    payload['name'] = new_name
     # Отправка PUT запроса
     update_pet = PutRequest(BASE_URL, PET_EP)
     update_pet.send_request_pet(payload)
@@ -81,18 +118,53 @@ def test_update_pet(create_pet_payload, delete_test_pet):
     update_pet.check_headers()
     update_pet.check_name(new_name)
 
+
+@pytest.mark.parametrize(
+    "create_user_payload, expected_code",
+    [
+        # Позитивные кейсы
+        ("User", 200),
+        ("Us", 200),
+        ("Современные технологии развиваются очень быстро, открывая перед каждым"
+         " человеком уникальные возможности для обучения, творчества, работы и "
+         "эффективного общения в любое время суток из любой точки нашей большой планеты", 200),
+        ("12345", 200),
+        (" ", 200),
+        ("Cat and Dog", 200),
+        (" Cattie", 200),
+        # Негативные кейсы
+        (12345, 400),
+        ("", 400),
+        (None, 400)
+    ],
+    indirect=["create_user_payload"],
+    ids=[
+        "Standard name",
+        "Short name",
+        "Long name (250 chars)",
+        "Numeric string name",
+        "Space",
+        "Name with space",
+        "Space at the beginning ",
+        "Name is integer",
+        "Empty string",
+        "None"
+    ]
+)
+
 # Create user (POST)
-def test_create_user(create_user_payload, delete_test_user):
+def test_create_user(create_user_payload, expected_code,  delete_test_user):
     # Создание пейлоуда
     payload = create_user_payload
     # Отправка POST запроса
     create_new_user = PostRequest(BASE_URL, USER_EP)
     create_new_user.send_request(payload)
     # Передача username в фикстуру удаления
-    created_user_username = payload['username']
-    delete_test_user['username'] = created_user_username
+    if create_new_user.response.status_code == 200:
+        created_user_username = payload['username']
+        delete_test_user['username'] = created_user_username
     # Проверки
-    create_new_user.check_response_status()
+    create_new_user.check_response_status(expected_code)
     create_new_user.check_headers()
 
 # Get user by username (GET)

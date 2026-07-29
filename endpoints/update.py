@@ -19,10 +19,9 @@ class PutRequest:
 
     # Проверка имени измененного питомца
     def check_name(self, name: str):
-        assert self.response_json['category']['name'] == name, (
-            f"Expected pet name {name}, but got {self.response_json['category']['name']}"
+        assert self.response_json['name'] == name, (
+            f"Expected pet name {name}, but got {self.response_json['name']}"
         )
-        print(self.response_json['category']['name'])
 
     # Проверка статус кода
     def check_response_status(self):
